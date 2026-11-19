@@ -1,0 +1,27 @@
+CREATE TABLE districts (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ name VARCHAR(100) NOT NULL,
+ province VARCHAR(100) NOT NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ UNIQUE KEY uq_district_province (province, name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE health_centers (
+ id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ district_id INT UNSIGNED NOT NULL,
+ name VARCHAR(150) NOT NULL,
+ code VARCHAR(20) NULL UNIQUE,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT fk_center_district FOREIGN KEY (district_id) REFERENCES districts(id),
+ UNIQUE KEY uq_center_district_name (district_id, name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE app_settings (
+ id TINYINT UNSIGNED PRIMARY KEY,
+ district_id INT UNSIGNED NULL,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ CONSTRAINT chk_single_settings CHECK (id = 1),
+ CONSTRAINT fk_settings_district FOREIGN KEY (district_id) REFERENCES districts(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO app_settings (id, district_id) VALUES (1, NULL);
