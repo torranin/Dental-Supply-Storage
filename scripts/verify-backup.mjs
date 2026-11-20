@@ -20,7 +20,7 @@ try {
   if(result.total!==table.rows) throw new Error('Restored row count differs: '+table.name);
   const [[original]]=await admin.query('SHOW CREATE TABLE ??',[table.name]);
   const [[copy]]=await restored.query('SHOW CREATE TABLE ??',[table.name]);
-  if(original['Create Table']!==copy['Create Table']) throw new Error('Restored schema differs: '+table.name);
+  if(original['Create Table'].replace(/AUTO_INCREMENT=\d+ /g,'')!==copy['Create Table'].replace(/AUTO_INCREMENT=\d+ /g,'')) throw new Error('Restored schema differs: '+table.name);
  }
  const [[category]]=await restored.query('SELECT id FROM categories LIMIT 1');
  const [[unit]]=await restored.query('SELECT id FROM units LIMIT 1');
