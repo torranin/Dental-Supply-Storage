@@ -1,9 +1,11 @@
+import {requireSession} from '../../../lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '../../../lib/db';
 import type { RowDataPacket } from 'mysql2';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function GET() {
+ const denied=await requireSession();if(denied)return denied;
  try {
   const db=getDb();
   const [districts]=await db.query('SELECT id,name,province FROM districts ORDER BY province,name');
@@ -13,6 +15,7 @@ export async function GET() {
  } catch { return NextResponse.json({error:'ไม่สามารถโหลดข้อมูลหน่วยงานจากฐานข้อมูลได้'},{status:503}); }
 }
 export async function POST(request:NextRequest) {
+ const denied=await requireSession();if(denied)return denied;
  if(request.headers.get('origin')!==request.nextUrl.origin) return NextResponse.json({error:'ไม่อนุญาตคำขอจากภายนอก'},{status:403});
  let data;
  try {data=await request.json();}catch{return NextResponse.json({error:'ข้อมูลไม่ถูกต้อง'},{status:400});}

@@ -1,8 +1,10 @@
+import {requireSession} from '../../../lib/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '../../../lib/db';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
 export const dynamic='force-dynamic';
 export async function GET(){
+ const denied=await requireSession();if(denied)return denied;
  try{
  const db=getDb();
  const [items]=await db.query(`SELECT m.code id,m.name,c.name category,u.name unit,m.stock,m.minimum_stock min,CAST(m.unit_price AS DOUBLE) price,COALESCE(DATE_FORMAT(m.expiry_date,'%Y-%m-%d'),'') expiry,COALESCE(l.code,'') location FROM materials m JOIN categories c ON c.id=m.category_id JOIN units u ON u.id=m.unit_id LEFT JOIN storage_locations l ON l.id=m.location_id WHERE m.is_active=1 ORDER BY m.code`);
@@ -11,6 +13,7 @@ export async function GET(){
  }catch{return NextResponse.json({error:'โหลดข้อมูลคลังไม่สำเร็จ กรุณาตรวจสอบฐานข้อมูล'},{status:503});}
 }
 export async function POST(req:NextRequest){
+ const denied=await requireSession();if(denied)return denied;
  let sameOrigin=false;try{sameOrigin=new URL(req.headers.get('origin')||'').host===req.headers.get('host');}catch{} 
  if(!sameOrigin)return NextResponse.json({error:'ไม่อนุญาตคำขอจากภายนอก'},{status:403});
  let b;try{b=await req.json();}catch{return NextResponse.json({error:'ข้อมูลไม่ถูกต้อง'},{status:400});}
